@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixeLilyConvert · пиксель-арт конвертер</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(145deg, #1a1f2e 0%, #232838 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, system-ui, -apple-system, sans-serif;
+            padding: 16px;
+            margin: 0;
+        }
+
+        .card {
+            max-width: 1000px;
+            width: 100%;
+            background: rgba(20, 25, 38, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 210, 235, 0.15);
+            border-radius: 48px 48px 40px 40px;
+            box-shadow: 0 25px 45px -10px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            padding: 28px 30px 38px;
+            transition: all 0.2s;
+        }
+
+        /* шапка с лилией */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed rgba(255, 180, 210, 0.3);
+        }
+
+        .title-block {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .lily-icon {
+            font-size: 2.4rem;
+            filter: drop-shadow(0 0 6px #ffa0d0);
+            transform: scale(1.2);
+            margin-right: 4px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            background: linear-gradient(130deg, #fcc2e7, #b7dcff, #c7e9b0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            line-height: 1.1;
+        }
+
+        .version-badge {
+            background: #3c3b5e;
+            color: #f0d5ff;
+            border-radius: 40px;
+            padding: 6px 16px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid #9580b0;
+            box-shadow: inset 0 0 6px #bba0d0;
+            backdrop-filter: blur(4px);
+        }
+
+        /* панель загрузки */
+        .upload-panel {
+            background: rgba(12, 15, 26, 0.7);
+            border-radius: 40px;
+            padding: 24px 28px;
+            margin-bottom: 32px;
+            border: 1px solid #3e3b57;
+            box-shadow: 0 10px 20px -10px #0a0b14;
+        }
+
+        .upload-area {
+            border: 2px dashed #6d5387;
+            border-radius: 36px;
+            padding: 28px 20px;
+            text-align: center;
+            background: rgba(28, 24, 44, 0.6);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #cdc2e6;
+        }
+
+        .upload-area:hover {
+            border-color: #ffa7d9;
+            background: rgba(55, 45, 80, 0.7);
+            color: white;
+            box-shadow: 0 0 20px #b85f9e50;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .upload-label {
+            font-size: 1.2rem;
+            font-weight: 400;
+            background: #3f356b80;
+            padding: 10px 24px;
+            border-radius: 60px;
+            display: inline-block;
+            backdrop-filter: blur(5px);
+            border: 1px solid #b07faa;
+        }
+
+        .info-note {
+            margin-top: 12px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        /* контролы */
+        .controls-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px 25px;
+            margin-bottom: 32px;
+            background: #1e1a2c60;
+            padding: 22px 25px;
+            border-radius: 50px;
+            backdrop-filter: blur(5px);
+            border: 1px solid #51466b;
+            align-items: center;
+        }
+
+        .slider-block {
+            flex: 2 1 240px;
+            min-width: 200px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            color: #f0defa;
+            margin-bottom: 5px;
+            font-weight: 300;
+            letter-spacing: 0.4px;
+        }
+
+        input[type=range] {
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, #a284c9, #ffb3d9);
+            border-radius: 20px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #f7c2ff, 0 0 4px black;
+            border: 2px solid #dbb2ff;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        .color-options {
+            display: flex;
+            flex: 3 1 300px;
+            gap: 18px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 10px;
+            background: #2d2442;
+            padding: 5px 12px;
+            border-radius: 40px;
+            border: 1px solid #73668f;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #e7d2f0;
+            font-size: 0.95rem;
+        }
+
+        .radio-group input[type="radio"] {
+            accent-color: #ffa0d0;
+            width: 16px;
+            height: 16px;
+        }
+
+        .palette-size select {
+            background: #31294b;
+            border: 1px solid #aa92cf;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: 500;
+            cursor: pointer;
+            outline: none;
+            font-size: 0.95rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            flex: 1 1 200px;
+        }
+
+        .btn {
+            background: #342d4e;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #f2e3ff;
+            border: 1px solid #9c83b6;
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 5px 12px #00000030;
+        }
+
+        .btn-primary {
+            background: #7f5d9b;
+            border-color: #f0b5da;
+            color: white;
+            box-shadow: 0 0 15px #bc8fdaa0;
+        }
+
+        .btn-primary:hover {
+            background: #9c75bb;
+            border-color: #ffc0e5;
+            transform: scale(1.02);
+        }
+
+        .btn:hover {
+            background: #4d3f68;
+            border-color: #d6aeea;
+        }
+
+        /* холсты */
+        .canvas-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            justify-content: center;
+            margin: 25px 0 15px;
+        }
+
+        .canvas-container {
+            background: #131127;
+            border-radius: 32px;
+            padding: 18px 18px 16px;
+            border: 1px solid #68547e;
+            box-shadow: inset 0 0 20px #050107, 0 15px 25px #0000006b;
+            flex: 1 1 280px;
+            min-width: 260px;
+        }
+
+        .container-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            color: #ddc7fc;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 300;
+        }
+
+        .container-label span {
+            font-size: 1.2rem;
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            border-radius: 24px;
+            background: #25203a;
+            display: block;
+            box-shadow: 0 4px 10px #00000077;
+            border: 2px solid #564673;
+            image-rendering: crisp-edges;         /* для пиксельного вида */
+            image-rendering: pixelated;
+        }
+
+        .download-row {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .footer-note {
+            margin-top: 20px;
+            color: #7d72a0;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px dashed #43405e;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="header">
+        <div class="title-block">
+            <span class="lily-icon">⚜️🌸</span>
+            <h1>PixeLilyConvert</h1>
+        </div>
+        <div class="version-badge">✨ пиксель-арт генератор</div>
+    </div>
+
+    <div class="upload-panel">
+        <div class="upload-area" id="uploadArea">
+            <span class="upload-icon">🌿</span>
+            <div class="upload-label">перетащи изображение или нажми сюда</div>
+            <div class="info-note">
+                <span>📷 PNG, JPG, WEBP</span>
+                <span>✦</span>
+                <span>max 2500x2500</span>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        </div>
+    </div>
+
+    <div class="controls-grid">
+        <div class="slider-block">
+            <div class="slider-label">
+                <span>🧩 пикселизация (размер блока)</span>
+                <span id="pixelSizeValue">8</span>
+            </div>
+            <input type="range" id="pixelSizeSlider" min="2" max="32" value="8" step="1">
+        </div>
+
+        <div class="color-options">
+            <div class="radio-group">
+                <label><input type="radio" name="paletteMode" value="natural" checked> 🌈 натуральные</label>
+                <label><input type="radio" name="paletteMode" value="limited"> 🎨 огранич. палитра</label>
+            </div>
+            <div class="palette-size" id="paletteSizeWrap" style="display: none;">
+                <select id="paletteSizeSelect">
+                    <option value="4">4 цвета</option>
+                    <option value="8" selected>8 цветов</option>
+                    <option value="16">16 цветов</option>
+                    <option value="32">32 цвета</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn" id="resetBtn">↺ сброс</button>
+            <button class="btn btn-primary" id="downloadBtn">⬇ скачать пиксель-арт</button>
+        </div>
+    </div>
+
+    <div class="canvas-area">
+        <div class="canvas-container">
+            <div class="container-label"><span>🖼️</span> оригинал</div>
+            <canvas id="originalCanvas"></canvas>
+        </div>
+        <div class="canvas-container">
+            <div class="container-label"><span>🎲</span> пиксель-арт</div>
+            <canvas id="pixelatedCanvas"></canvas>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        <span>PixeLilyConvert — превращай фото в пиксельное настроение</span>
+        <span>⚘</span>
+        <span>made с ❤ и лилиями</span>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ------ элементы ------
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const originalCanvas = document.getElementById('originalCanvas');
+        const pixelatedCanvas = document.getElementById('pixelatedCanvas');
+        const ctxOrig = originalCanvas.getContext('2d');
+        const ctxPixel = pixelatedCanvas.getContext('2d');
+
+        const pixelSizeSlider = document.getElementById('pixelSizeSlider');
+        const pixelSizeSpan = document.getElementById('pixelSizeValue');
+        const paletteModeRadios = document.querySelectorAll('input[name="paletteMode"]');
+        const paletteSizeWrap = document.getElementById('paletteSizeWrap');
+        const paletteSizeSelect = document.getElementById('paletteSizeSelect');
+        const resetBtn = document.getElementById('resetBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // состояние
+        let originalImage = null;          // храним HTML ImageElement
+        let currentPixelSize = 8;
+        let currentMode = 'natural';        // natural / limited
+        let maxColors = 8;                   // для ограниченной палитры
+
+        // при смене радио показываем/скрываем выбор кол-ва цветов
+        function togglePaletteSizeVisibility() {
+            currentMode = document.querySelector('input[name="paletteMode"]:checked').value;
+            if (currentMode === 'limited') {
+                paletteSizeWrap.style.display = 'block';
+            } else {
+                paletteSizeWrap.style.display = 'none';
+            }
+            // если картинка загружена – обновить пикселизацию
+            if (originalImage) applyPixelation();
+        }
+        paletteModeRadios.forEach(radio => radio.addEventListener('change', togglePaletteSizeVisibility));
+        togglePaletteSizeVisibility(); // начальное состояние
+
+        // обновление значения слайдера
+        pixelSizeSlider.addEventListener('input', (e) => {
+            pixelSizeSpan.innerText = e.target.value;
+            currentPixelSize = parseInt(e.target.value, 10);
+            if (originalImage) applyPixelation();
+        });
+
+        // смена размера палитры
+        paletteSizeSelect.addEventListener('change', (e) => {
+            maxColors = parseInt(e.target.value, 10);
+            if (originalImage && currentMode === 'limited') applyPixelation();
+        });
+
+        // ------ загрузка изображения ------
+        function loadImageFromFile(file) {
+            if (!file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    originalImage = img;
+                    // устанавливаем холсты с сохранением пропорций, но не больше 500px по ширине
+                    let targetWidth = img.width;
+                    let targetHeight = img.height;
+                    const MAX_WIDTH = 520;
+                    if (targetWidth > MAX_WIDTH) {
+                        targetHeight = Math.floor((MAX_WIDTH / targetWidth) * targetHeight);
+                        targetWidth = MAX_WIDTH;
+                    }
+                    if (targetHeight > 400) { // дополнительно ограничим высоту для удобства
+                        targetWidth = Math.floor((400 / targetHeight) * targetWidth);
+                        targetHeight = 400;
+                    }
+                    originalCanvas.width = targetWidth;
+                    originalCanvas.height = targetHeight;
+                    pixelatedCanvas.width = targetWidth;
+                    pixelatedCanvas.height = targetHeight;
+
+                    // рисуем оригинал
+                    ctxOrig.drawImage(img, 0, 0, targetWidth, targetHeight);
+                    // применяем пикселизацию
+                    applyPixelation();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // обработчики drag & drop и клика
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#ffa7d9';
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#6d5387';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#6d5387';
+            const file = e.dataTransfer.files[0];
+            if (file) loadImageFromFile(file);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) loadImageFromFile(file);
+        });
+
+        // ------ пикселизация + палитра ------
+        function applyPixelation() {
+            if (!originalImage) return;
+            const w = originalCanvas.width;
+            const h = originalCanvas.height;
+
+            // получаем данные оригинального холста (уже подогнан под размер)
+            const imageData = ctxOrig.getImageData(0, 0, w, h);
+            const data = imageData.data;
+
+            // создаём новый ImageData для пиксель-арта (пока просто скопируем)
+            const pixelData = new ImageData(w, h);
+            const pixOut = pixelData.data;
+
+            const step = currentPixelSize;
+
+            // 1. простое усреднение блоками (пикселизация)
+            for (let y = 0; y < h; y += step) {
+                for (let x = 0; x < w; x += step) {
+                    // сумма цветов в блоке
+                    let r = 0, g = 0, b = 0, a = 0, count = 0;
+
+                    const maxY = Math.min(y + step, h);
+                    const maxX = Math.min(x + step, w);
+                    for (let blockY = y; blockY < maxY; blockY++) {
+                        for (let blockX = x; blockX < maxX; blockX++) {
+                            const index = (blockY * w + blockX) * 4;
+                            r += data[index];
+                            g += data[index + 1];
+                            b += data[index + 2];
+                            a += data[index + 3];
+                            count++;
+                        }
+                    }
+
+                    r = Math.round(r / count);
+                    g = Math.round(g / count);
+                    b = Math.round(b / count);
+                    a = Math.round(a / count);
+
+                    // заполняем блок этим цветом
+                    for (let blockY = y; blockY < maxY; blockY++) {
+                        for (let blockX = x; blockX < maxX; blockX++) {
+                            const outIndex = (blockY * w + blockX) * 4;
+                            pixOut[outIndex] = r;
+                            pixOut[outIndex + 1] = g;
+                            pixOut[outIndex + 2] = b;
+                            pixOut[outIndex + 3] = a;
+                        }
+                    }
+                }
+            }
+
+            // если включен режим ограниченной палитры – делаем квантование (простая кластеризация median cut не влезет, используем популярные цвета)
+            if (currentMode === 'limited') {
+                // собираем все уникальные цвета (упрощённо — каждый пиксель, но для производительности сэмплируем)
+                const colorMap = new Map(); // key -> [r,g,b, count] 
+                for (let i = 0; i < pixOut.length; i += 4) {
+                    const r = pixOut[i];
+                    const g = pixOut[i+1];
+                    const b = pixOut[i+2];
+                    const key = (r<<16)|(g<<8)|b;
+                    if (colorMap.has(key)) {
+                        colorMap.get(key).count++;
+                    } else {
+                        colorMap.set(key, {r, g, b, count: 1});
+                    }
+                }
+
+                // сортируем по популярности и берём до maxColors
+                const sortedColors = Array.from(colorMap.values()).sort((a, b) => b.count - a.count);
+                const topColors = sortedColors.slice(0, maxColors).map(c => [c.r, c.g, c.b]);
+
+                // если цветов мало, оставляем как есть, иначе маппим каждый пиксель к ближайшему из палитры
+                if (topColors.length > 0 && topColors.length < maxColors) {
+                    // функция поиска ближайшего цвета (евклидово расстояние)
+                    function findClosest(r, g, b) {
+                        let minDist = Infinity;
+                        let best = topColors[0];
+                        for (const col of topColors) {
+                            const dr = r - col[0];
+                            const dg = g - col[1];
+                            const db = b - col[2];
+                            const dist = dr*dr + dg*dg + db*db;
+                            if (dist < minDist) {
+                                minDist = dist;
+                                best = col;
+                            }
+                        }
+                        return best;
+                    }
+
+                    for (let i = 0; i < pixOut.length; i += 4) {
+                        const [nr, ng, nb] = findClosest(pixOut[i], pixOut[i+1], pixOut[i+2]);
+                        pixOut[i] = nr;
+                        pixOut[i+1] = ng;
+                        pixOut[i+2] = nb;
+                        // альфа без изменений
+                    }
+                }
+            }
+
+            // отрисовываем финальный пиксель-арт
+            ctxPixel.putImageData(pixelData, 0, 0);
+        }
+
+        // сброс к исходному изображению (без изменений, но повторно применить с текущими настройками)
+        resetBtn.addEventListener('click', () => {
+            if (!originalImage) return;
+            // перерисовываем оригинал (на случай если вдруг испортили)
+            ctxOrig.drawImage(originalImage, 0, 0, originalCanvas.width, originalCanvas.height);
+            applyPixelation();
+        });
+
+        // скачивание пиксель-арта
+        downloadBtn.addEventListener('click', () => {
+            if (!originalImage) {
+                alert('✨ сначала загрузи изображение');
+                return;
+            }
+            const link = document.createElement('a');
+            link.download = 'pixelily_art.png';
+            pixelatedCanvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                link.href = url;
+                link.click();
+                URL.revokeObjectURL(url);
+            }, 'image/png');
+        });
+
+        // служебное: если изменён слайдер, пикселизация уже вызывается в обработчике.
+        // дополнительно: при переключении режима обновляем картинку
+        paletteModeRadios.forEach(r => r.addEventListener('change', () => {
+            if (originalImage) applyPixelation();
+        }));
+        paletteSizeSelect.addEventListener('change', () => {
+            if (originalImage && currentMode === 'limited') applyPixelation();
+        });
+
+        // инициализация текста слайдера
+        pixelSizeSpan.innerText = pixelSizeSlider.value;
+    })();
+</script>
+</body>
+</html>
